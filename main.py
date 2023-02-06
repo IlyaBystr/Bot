@@ -3,7 +3,6 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 import telebot
 import random
 from telebot import types
-from spy import log
 bot = telebot.TeleBot("6004565538:AAGOxuc9VVSwLt3yJskgP8kU1BvYhqQlNcY")
 
 sweets = 221
