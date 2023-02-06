@@ -1,7 +1,9 @@
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 import telebot
 import random
 from telebot import types
-
+from spy import log
 bot = telebot.TeleBot("6004565538:AAGOxuc9VVSwLt3yJskgP8kU1BvYhqQlNcY")
 
 sweets = 221
@@ -12,27 +14,48 @@ flag = ""
 
 @bot.message_handler(commands=["start"])
 def start(message):
-    bot.send_message(message.chat.id, "/game")
-    bot.send_message(message.chat.id, "/calculator")
-
-
-@bot.message_handler(commands=["game"])
-def button(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    but1 = types.KeyboardButton("Узнать правила игры")
-    but2 = types.KeyboardButton("Начать игру")
-    markup.add(but1)
-    markup.add(but2)
-    bot.send_message(message.chat.id, "Выберите ниже", reply_markup=markup)
+    item1 = types.KeyboardButton("game")
+    item2 = types.KeyboardButton("calculator")
+    markup.add(item1, item2)
+    bot.send_message(message.chat.id, "Hello", reply_markup=markup)
 
-@bot.message_handler(content_types="text")
-def controller(message):
-    print(message.text)
+@bot.message_handler(content_types=["text"])
+def button(message):
+    if message.text == "game":
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        but1 = types.KeyboardButton("Узнать правила игры")
+        but2 = types.KeyboardButton("Начать игру")
+        markup.add(but1)
+        markup.add(but2)
+        bot.send_message(message.chat.id, "Выберите ниже", reply_markup=markup)
+        bot.register_next_step_handler(message, sas)
+    elif message.text == "calculator":
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        key1 = types.KeyboardButton("Рациональные")
+        key2 = types.KeyboardButton("Комплексные")
+        markup.add(key1, key2)
+        bot.send_message(message.chat.id, "Калькулятор", reply_markup=markup)
+        bot.register_next_step_handler(message, sas)
+
+def sas(message):
+    a = 0 
+    global typeNums 
     if message.text == "Узнать правила игры":
         bot.send_message(message.chat.id, "На столе лежит 221 конфета. Играют два игрока делая ход друг после друга.\n Первый ход определяется жеребьёвкой. За один ход можно забрать не более чем 28 конфет. \n Все конфеты оппонента достаются сделавшему последний ход.")
     elif message.text == "Начать игру":
         bot.send_message(message.chat.id, "Игра началась")
         bot.register_next_step_handler(message, paly)
+    elif message.text == "Рациональные":
+        bot.send_message(message.chat.id, f"Выбраны рациональные числа", reply_markup=a)
+        bot.send_message(message.chat.id, f"Введите выражение разделяя пробелом")
+        bot.register_next_step_handler(message, con)
+        typeNums = 0
+    elif message.text == "Комплексные":
+        bot.send_message(message.chat.id, "Выбраны комплексные числа", reply_markup=a)
+        bot.send_message(message.chat.id, "Введите выражение разделяя пробелом")
+        bot.register_next_step_handler(message, con)
+        typeNums = 1
 
 
 def paly(message):
@@ -84,27 +107,9 @@ def user_input(message):
     controller(message)
 
 
-
-@bot.message_handler(commands=["calculator"])
-def buttons(message):
-    global typeNums
-    a = types.ReplyKeyboardRemove()
-    if message.text == 'Рациональные':
-        bot.send_message(message.chat.id, f"Выбраны рациональные числа", reply_markup=a)
-        bot.send_message(message.chat.id, f"Введите выражение разделяя пробелом")
-        bot.register_next_step_handler(message, controller)
-        typeNums = 0
-    elif message.text == "Комплексные":
-        bot.send_message(message.chat.id, f"Выбраны комплексные числа", reply_markup=a)
-        bot.send_message(message.chat.id, f"Введите выражение разделяя пробелом")
-        bot.register_next_step_handler(message, controller)
-        typeNums = 1
-
-
-
-def controller(message):
+def con(message):
     res = ""
-    line = message.txt.split()
+    line = message.text.split()
     znak = line[1]
     if typeNums == 0:
         a = int(line[0])
